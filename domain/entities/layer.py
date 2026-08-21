@@ -1,4 +1,6 @@
 from domain.entities.stroke import Stroke
+from domain.entities.fill import FillOperation
+
 
 class Layer:
     def __init__(self, name: str):
@@ -6,19 +8,22 @@ class Layer:
             raise ValueError("Layer name cannot be empty.")
 
         self.name = name
-        self.strokes: list[Stroke] = []
+        self.operations: list[Stroke | FillOperation] = []
 
-    def add_stroke(self, stroke: Stroke) -> None:
-        self.strokes.append(stroke)
+    def add_operation(
+        self,
+        operation: Stroke | FillOperation,
+    ) -> None:
+        self.operations.append(operation)
 
-    def remove_stroke(self, index: int) -> None:
-        if index < 0 or index >= len(self.strokes):
-            raise IndexError("Stroke index out of range.")
+    def remove_operation(self, index: int) -> None:
+        if index < 0 or index >= len(self.operations):
+            raise IndexError("Operation index out of range.")
 
-        self.strokes.pop(index)
+        self.operations.pop(index)
 
     def clear(self) -> None:
-        self.strokes.clear()
+        self.operations.clear()
 
     def rename(self, name: str) -> None:
         if not name.strip():

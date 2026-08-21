@@ -1,4 +1,7 @@
+from domain.value_objects.color import Color
+from domain.value_objects.point import Point
 from domain.entities.layer import Layer
+from domain.entities.fill import FillOperation
 
 class JankyPaint:
     def __init__(self, width: int, height: int):
@@ -46,3 +49,14 @@ class JankyPaint:
                 self.active_layer_index,
                 len(self.layers) - 1,
             )
+    def fill_area(
+        self,
+        point: Point,
+        color: Color,
+    ) -> None:
+        operation = FillOperation(
+            point=point,
+            color=color,
+        )
+
+        self.active_layer.add_operation(operation)

@@ -17,4 +17,4 @@ class DrawStrokeUseCase:
             settings=settings,
         )
 
-        paint.active_layer.add_stroke(stroke)
+        paint.active_layer.add_operation(stroke)

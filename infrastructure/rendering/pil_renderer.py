@@ -1,8 +1,10 @@
+from PIL import ImageChops
 from PIL import Image, ImageChops, ImageDraw
 
 from domain.entities.janky_paint import JankyPaint
 from domain.entities.layer import Layer
 from domain.entities.stroke import Stroke
+from domain.entities.fill import FillOperation
 from domain.value_objects.paint_tool import PaintTool
 
 
@@ -40,11 +42,19 @@ class PILRenderer:
         layer: Layer,
     ) -> None:
 
-        for stroke in layer.strokes:
-            self._render_stroke(
-                image,
-                stroke,
-            )
+        for operation in layer.operations:
+
+            if isinstance(operation, Stroke):
+                self._render_stroke(
+                    image,
+                    operation,
+                )
+
+            elif isinstance(operation, FillOperation):
+                self._render_fill(
+                    image,
+                    operation,
+                )
 
     def _render_stroke(
         self,
@@ -77,6 +87,28 @@ class PILRenderer:
                 stroke,
             )
 
+    def _render_fill(
+        self,
+        image: Image.Image,
+        operation: FillOperation,
+    ) -> None:
+
+        color = (
+            operation.color.red,
+            operation.color.green,
+            operation.color.blue,
+            operation.color.alpha,
+        )
+
+        ImageDraw.floodfill(
+            image,
+            (
+                operation.point.x,
+                operation.point.y,
+            ),
+            color,
+        )
+
     def _draw_brush(
         self,
         image: Image.Image,
@@ -107,8 +139,6 @@ class PILRenderer:
         stroke: Stroke,
     ) -> None:
 
-        # Create a grayscale mask representing
-        # the area that should be erased.
         mask = Image.new(
             "L",
             image.size,
@@ -124,10 +154,8 @@ class PILRenderer:
             joint="curve",
         )
 
-        # Get the current alpha channel.
         current_alpha = image.getchannel("A")
 
-        # Remove the erased area from the alpha.
         new_alpha = ImageChops.subtract(
             current_alpha,
             mask,

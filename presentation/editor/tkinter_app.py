@@ -1,3 +1,4 @@
+from asyncio import base_events
 import tkinter as tk
 
 from PIL import ImageTk
@@ -116,6 +117,15 @@ class JankyPaintApp:
             command=self._use_eraser,
         ).pack(fill=tk.X, pady=2)
 
+        tk.Button(
+            self.toolbar,
+            text="🪣 Bucket",
+            command=self._use_bucket,
+        ).pack(
+            fill=tk.X,
+            pady=2,
+        )
+
     def _build_brush_size_slider(self) -> None:
         tk.Label(self.toolbar, text="Size:").pack(pady=(15, 2))
 
@@ -149,6 +159,9 @@ class JankyPaintApp:
     def _use_eraser(self) -> None:
         self.controller.set_tool(PaintTool.ERASER)
 
+    def _use_bucket(self) -> None:
+        self.controller.set_tool(PaintTool.BUCKET)
+        
     def _on_brush_size_change(self, value: str) -> None:
         self.controller.set_brush_size(int(value))
 
@@ -168,8 +181,21 @@ class JankyPaintApp:
     # =========================================================
 
     def _on_stroke_start(self, event) -> None:
+
+        if self.controller.current_tool == PaintTool.BUCKET:
+            self.controller.fill_area(
+                Point(event.x, event.y)
+            )
+
+            self._refresh_canvas()
+            return
+
         self.is_drawing = True
-        self.current_points = [Point(event.x, event.y)]
+
+        self.current_points = [
+            Point(event.x, event.y)
+        ]
+
         self.preview_ids = []
 
     def _on_stroke_continue(self, event) -> None:

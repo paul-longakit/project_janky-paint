@@ -40,6 +40,11 @@ draw_stroke.execute(
     ),
 )
 
+paint.fill_area(
+    point=Point(200, 200),
+    color=Color(255, 0, 0),
+)
+
 
 renderer = PILRenderer()
 repository = PNGAssetRepository()

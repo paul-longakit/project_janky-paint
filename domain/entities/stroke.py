@@ -1,8 +1,9 @@
+from domain.entities.painting_operations import PaintingOperation
 from domain.value_objects.brush_settings import BrushSettings
 from domain.value_objects.point import Point
 
 
-class Stroke:
+class Stroke(PaintingOperation):
     def __init__(
         self,
         points: list[Point],
