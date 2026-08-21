@@ -1,4 +1,4 @@
-from domain.entities.paintAppEntity import JankyPaint
+from src.domain.entities.paintAppEntity import JankyPaintApp
 
 
 class SaveAssetUseCase:
@@ -13,7 +13,7 @@ class SaveAssetUseCase:
 
     def execute(
         self,
-        paint: JankyPaint,
+        paint: JankyPaintApp,
         path: str,
     ) -> None:
 

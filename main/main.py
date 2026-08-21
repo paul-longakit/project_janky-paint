@@ -1,6 +1,6 @@
 import tkinter as tk
 
-from src.presentation.editor.app import JankyPaintApp
+from src.presentation.editor.jankyPaintapp import JankyPaintApp
 
 
 def main():

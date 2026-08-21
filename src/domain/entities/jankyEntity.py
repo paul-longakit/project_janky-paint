@@ -1,4 +1,4 @@
-class LoreEntity:
+class JankyEntity:
     def __init__(
         self,
         name: str,

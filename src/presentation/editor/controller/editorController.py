@@ -3,26 +3,27 @@ from src.application.useCases.addLayerUseCase import AddLayerUseCase
 from src.application.useCases.clearLayerUseCase import ClearLayerUseCase
 from src.application.useCases.drawStrokeUseCase import DrawStrokeUseCase
 from src.application.useCases.saveAssetUseCase import SaveAssetUseCase
-from application.useCases.selectLayerUseCase import SelectLayerUseCase
+from src.application.useCases.selectLayerUseCase import SelectLayerUseCase
+from src.application.useCases.deleteLayerUseCase import DeleteLayerUseCase
 
 
-from domain.entities.paintAppEntity import JankyPaint
+from src.domain.entities.paintAppEntity import JankyPaintApp
 from src.domain.value_objects.brushSettingsValueObject import BrushSettings
 from src.domain.value_objects.colorValueObject import Color
 from src.domain.enums.paintToolEnum import PaintTool
 from src.domain.value_objects.pointValueObject import Point
 
-
+from src.domain.abstractions.rendererAbstraction import Renderer
 
 class EditorController:
 
     def __init__(
         self,
-        paint: JankyPaint,
-        renderer,
+        paint: JankyPaintApp,
+        renderer: Renderer,
         save_asset_use_case: SaveAssetUseCase,
     ):
-        self.paint: JankyPaint = paint
+        self.paint: JankyPaintApp = paint
         self.current_tool = PaintTool.BRUSH
         self.current_color = Color(0, 0, 0)
         self.current_brush_size = 5
@@ -31,9 +32,12 @@ class EditorController:
 
         self.add_layer_use_case = AddLayerUseCase()
         self.select_layer_use_case = SelectLayerUseCase()
-        self.draw_stroke_use_case = DrawStrokeUseCase()
+        self.delete_layer_use_case = DeleteLayerUseCase()
+        self.draw_stroke_use_case = DrawStrokeUseCase(renderer)
         self.clear_layer_use_case = ClearLayerUseCase()
-        self.fill_area_use_case = FillAreaUseCase()
+        self.fill_area_use_case = FillAreaUseCase(
+            renderer=renderer,
+        )
 
     def add_layer(self, name: str) -> None:
         self.add_layer_use_case.execute(
@@ -44,7 +48,13 @@ class EditorController:
     def select_layer(self, index: int) -> None:
         self.select_layer_use_case.execute(
             paint=self.paint,
-            index=index,
+            layer_index=index,
+        )
+
+    def delete_layer(self, index: int) -> None:
+        self.delete_layer_use_case.execute(
+            paint=self.paint,
+            layer_index=index,
         )
 
     def draw_stroke(

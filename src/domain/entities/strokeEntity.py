@@ -1,9 +1,9 @@
-from domain.entities.paintingOperationEntity import PaintingOperation
+from src.domain.entities.paintingOperationEntity import PaintingOperation
 
-from domain.value_objects.brushSettingsValueObject import BrushSettings
-from domain.value_objects.pointValueObject import Point
+from src.domain.value_objects.brushSettingsValueObject import BrushSettings
+from src.domain.value_objects.pointValueObject import Point
 
-from domain.enums.paintingOperationEnum import PaintingOperationType
+from src.domain.enums.paintingOperationEnum import PaintingOperationType
 
 
 class Stroke(PaintingOperation):

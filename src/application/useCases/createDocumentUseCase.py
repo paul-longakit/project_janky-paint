@@ -1,6 +1,5 @@
-from domain.entities.paintAppEntity import JankyPaint
-from domain.entities.layerEntity import Layer
-
+from src.domain.entities.paintAppEntity import JankyPaintApp
+from src.domain.entities.layerEntity import Layer
 
 class CreateDocumentUseCase:
 
@@ -8,15 +7,20 @@ class CreateDocumentUseCase:
         self,
         width: int,
         height: int,
-    ) -> JankyPaint:
+    ) -> JankyPaintApp:
 
-        paint = JankyPaint(
+        paint = JankyPaintApp(
             width=width,
             height=height,
         )
 
         paint.add_layer(
-            Layer("Layer 1")
+            Layer(
+                layer_id=1,
+                name="Layer 1",
+                width=width,
+                height=height,
+            )
         )
 
         return paint

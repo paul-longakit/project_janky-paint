@@ -1,32 +1,40 @@
-from domain.entities.strokeEntity import Stroke
-from domain.entities.fillEntity import FillOperation
+from PIL import Image
 
 
 class Layer:
-    def __init__(self, name: str):
-        if not name.strip():
-            raise ValueError("Layer name cannot be empty.")
 
-        self.name = name
-        self.operations: list[Stroke | FillOperation] = []
-
-    def add_operation(
+    def __init__(
         self,
-        operation: Stroke | FillOperation,
-    ) -> None:
+        layer_id: int,
+        name: str,
+        width: int,
+        height: int,
+    ):
+        self.id = layer_id
+        self.name = name
+
+        self.image = Image.new(
+            "RGBA",
+            (width, height),
+            (0, 0, 0, 0),
+        )
+
+        self.visible = True
+        self.opacity = 255
+
+        self.operations = []
+
+    def add_operation(self, operation) -> None:
         self.operations.append(operation)
-
-    def remove_operation(self, index: int) -> None:
-        if index < 0 or index >= len(self.operations):
-            raise IndexError("Operation index out of range.")
-
-        self.operations.pop(index)
 
     def clear(self) -> None:
         self.operations.clear()
 
     def rename(self, name: str) -> None:
-        if not name.strip():
-            raise ValueError("Layer name cannot be empty.")
-
         self.name = name
+
+    def set_visibility(self, visible: bool) -> None:
+        self.visible = visible
+
+    def set_opacity(self, opacity: int) -> None:
+        self.opacity = max(0, min(255, opacity))

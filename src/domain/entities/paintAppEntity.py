@@ -1,9 +1,9 @@
-from domain.value_objects.colorValueObject import Color
-from domain.value_objects.pointValueObject import Point
-from domain.entities.layerEntity import Layer
-from domain.entities.fillEntity import FillOperation
+from src.domain.value_objects.colorValueObject import Color
+from src.domain.value_objects.pointValueObject import Point
+from src.domain.entities.layerEntity import Layer
+from src.domain.entities.fillEntity import FillOperation
 
-class JankyPaint:
+class JankyPaintApp:
     def __init__(self, width: int, height: int):
         if width <= 0:
             raise ValueError("Canvas width must be greater than zero.")
@@ -19,8 +19,9 @@ class JankyPaint:
 
     @property
     def active_layer(self) -> Layer:
+
         if self.active_layer_index is None:
-            raise RuntimeError("No active layer exists.")
+            raise ValueError("No active layer selected.")
 
         return self.layers[self.active_layer_index]
 
@@ -49,14 +50,18 @@ class JankyPaint:
                 self.active_layer_index,
                 len(self.layers) - 1,
             )
+
     def fill_area(
         self,
         point: Point,
         color: Color,
-    ) -> None:
+    ) -> FillOperation:
+
         operation = FillOperation(
             point=point,
             color=color,
         )
 
         self.active_layer.add_operation(operation)
+
+        return operation

@@ -1,6 +1,6 @@
 from abc import ABC
 
-from domain.enums.paintingOperationEnum import PaintingOperationType
+from src.domain.enums.paintingOperationEnum import PaintingOperationType
 
 
 class PaintingOperation(ABC):

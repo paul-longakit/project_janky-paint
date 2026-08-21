@@ -3,7 +3,7 @@ from src.domain.entities.paintingOperationEntity import PaintingOperation
 from src.domain.value_objects.colorValueObject import Color
 from src.domain.value_objects.pointValueObject import Point
 
-from domain.enums.paintingOperationEnum import PaintingOperationType
+from src.domain.enums.paintingOperationEnum import PaintingOperationType
 
 
 class FillOperation(PaintingOperation):

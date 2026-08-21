@@ -1,9 +1,9 @@
-from domain.entities.paintAppEntity import JankyPaint
+from src.domain.entities.paintAppEntity import JankyPaintApp
 
 
 class ClearLayerUseCase:
     def execute(
         self,
-        paint: JankyPaint,
+        paint: JankyPaintApp,
     ) -> None:
         paint.active_layer.clear()

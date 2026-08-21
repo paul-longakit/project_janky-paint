@@ -1,10 +1,10 @@
-from domain.entities.paintAppEntity import JankyPaint
+from src.domain.entities.paintAppEntity import JankyPaintApp
 
 
 class RenameLayerUseCase:
     def execute(
         self,
-        paint: JankyPaint,
+        paint: JankyPaintApp,
         index: int,
         name: str,
     ) -> None:

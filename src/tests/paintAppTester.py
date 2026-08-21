@@ -2,7 +2,7 @@ from application.useCases.addLayerUseCase import AddLayerUseCase
 from application.useCases.drawStrokeUseCase import DrawStrokeUseCase
 from application.useCases.saveAssetUseCase import SaveAssetUseCase
 
-from domain.entities.paintAppEntity import JankyPaint
+from domain.entities.paintAppEntity import JankyPaintApp
 from src.domain.value_objects.brushSettingsValueObject import BrushSettings
 from src.domain.value_objects.colorValueObject import Color
 from src.domain.value_objects.pointValueObject import Point
@@ -16,7 +16,7 @@ from src.infrastructure.rendering.pilRendererRendering import (
 )
 
 
-paint = JankyPaint(400, 400)
+paint = JankyPaintApp(400, 400)
 
 add_layer = AddLayerUseCase()
 

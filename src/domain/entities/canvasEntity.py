@@ -21,3 +21,12 @@ class Canvas:
             raise IndexError("Layer index out of range")
 
         self.active_layer_index = index
+
+    def remove_layer(self, index: int):
+        if index < 0 or index >= len(self.layers):
+            raise IndexError("Layer index out of range")
+
+        del self.layers[index]
+
+        if self.active_layer_index >= len(self.layers):
+            self.active_layer_index = len(self.layers) - 1

@@ -11,6 +11,7 @@ from src.infrastructure.rendering.pilRendererRendering import PILRenderer
 
 from src.presentation.editor.controller.editorController import EditorController
 from src.presentation.editor.panel.colorPanel import ColorPanel
+from src.presentation.editor.panel.layerPanel import LayerPanel
 
 from src.domain.value_objects.colorValueObject import Color
 from src.domain.enums.paintToolEnum import PaintTool
@@ -53,6 +54,7 @@ class JankyPaintApp:
         self._build_tool_buttons()
         self._build_brush_size_slider()
         self._build_color_panel()
+        self._build_layer_panel()
 
         # =========================================================
         # CANVAS
@@ -88,11 +90,7 @@ class JankyPaintApp:
         # LAYER CONTROL
         # =========================================================
 
-        tk.Button(
-            root,
-            text="Add Layer",
-            command=self._add_layer,
-        ).pack()
+
 
         # =========================================================
         # INITIAL CANVAS RENDER
@@ -149,6 +147,20 @@ class JankyPaintApp:
 
         self.color_panel.pack(fill=tk.X, pady=10)
 
+    def _build_layer_panel(self) -> None:
+        self.layer_panel = LayerPanel(
+            parent=self.root,
+            controller=self.controller,
+            on_layer_change=self._on_layer_change,
+        )
+
+        self.layer_panel.pack(
+            side=tk.RIGHT,
+            fill=tk.Y,
+            padx=5,
+            pady=5,
+        )
+
     # =========================================================
     # TOOL HANDLERS
     # =========================================================
@@ -168,13 +180,14 @@ class JankyPaintApp:
     def _on_color_change(self, color: Color) -> None:
         self.controller.set_color(color)
 
+    def _on_layer_change(self) -> None:
+        self._refresh_canvas()
+
     # =========================================================
     # LAYER HANDLERS
     # =========================================================
 
-    def _add_layer(self) -> None:
-        layer_number = len(self.controller.paint.layers) + 1
-        self.controller.add_layer(f"Layer {layer_number}")
+
 
     # =========================================================
     # STROKE HANDLERS

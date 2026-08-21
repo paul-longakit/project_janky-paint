@@ -1,16 +1,17 @@
 from PIL import ImageChops
 from PIL import Image, ImageChops, ImageDraw
 
-from domain.entities.paintAppEntity import JankyPaint
-from domain.entities.layerEntity import Layer
-from domain.entities.strokeEntity import Stroke
+from src.domain.entities.paintAppEntity import JankyPaintApp
+from src.domain.entities.layerEntity import Layer
+from src.domain.entities.strokeEntity import Stroke
 from src.domain.entities.fillEntity import FillOperation
 from src.domain.enums.paintToolEnum import PaintTool
 
+from src.domain.abstractions.rendererAbstraction import Renderer
 
-class PILRenderer:
+class PILRenderer(Renderer):
 
-    def render(self, paint: JankyPaint) -> Image.Image:
+    def render(self, paint: JankyPaintApp) -> Image.Image:
         image = Image.new(
             "RGBA",
             (paint.width, paint.height),
@@ -18,16 +19,23 @@ class PILRenderer:
         )
 
         for layer in paint.layers:
-            layer_image = Image.new(
-                "RGBA",
-                (paint.width, paint.height),
-                (0, 0, 0, 0),
-            )
 
-            self._render_layer(
-                layer_image,
-                layer,
-            )
+            if not layer.visible:
+                continue
+
+            layer_image = layer.image.copy()
+
+            if layer.opacity < 255:
+                alpha = layer_image.getchannel("A")
+
+                opacity = layer.opacity
+
+                def adjust_alpha(value: int) -> int:
+                    return value * opacity // 255
+
+                alpha = alpha.point(adjust_alpha)
+
+                layer_image.putalpha(alpha)
 
             image = Image.alpha_composite(
                 image,
@@ -35,26 +43,6 @@ class PILRenderer:
             )
 
         return image
-
-    def _render_layer(
-        self,
-        image: Image.Image,
-        layer: Layer,
-    ) -> None:
-
-        for operation in layer.operations:
-
-            if isinstance(operation, Stroke):
-                self._render_stroke(
-                    image,
-                    operation,
-                )
-
-            elif isinstance(operation, FillOperation):
-                self._render_fill(
-                    image,
-                    operation,
-                )
 
     def _render_stroke(
         self,
@@ -108,6 +96,24 @@ class PILRenderer:
             ),
             color,
         )
+
+    def render_operation(
+        self,
+        layer: Layer,
+        operation,
+    ) -> None:
+
+        if isinstance(operation, Stroke):
+            self._render_stroke(
+                layer.image,
+                operation,
+            )
+
+        elif isinstance(operation, FillOperation):
+            self._render_fill(
+                layer.image,
+                operation,
+            )
 
     def _draw_brush(
         self,
