@@ -4,8 +4,8 @@ from PIL import Image, ImageChops, ImageDraw
 from domain.entities.paintAppEntity import JankyPaint
 from domain.entities.layerEntity import Layer
 from domain.entities.strokeEntity import Stroke
-from domain.entities.fillEntity import FillOperation
-from domain.enums.paintToolEnum import PaintTool
+from src.domain.entities.fillEntity import FillOperation
+from src.domain.enums.paintToolEnum import PaintTool
 
 
 class PILRenderer:

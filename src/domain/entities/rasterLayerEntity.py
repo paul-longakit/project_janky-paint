@@ -1,5 +1,5 @@
-from domain.value_objects.colorValueObject import Color
-from domain.value_objects.pointValueObject import Point
+from src.domain.value_objects.colorValueObject import Color
+from src.domain.value_objects.pointValueObject import Point
 
 class RasterLayer:
 

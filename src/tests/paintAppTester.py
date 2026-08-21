@@ -1,17 +1,17 @@
-from application.use_cases.addLayerUseCase import AddLayerUseCase
-from application.use_cases.drawStrokeUseCase import DrawStrokeUseCase
-from application.use_cases.saveAssetUseCase import SaveAssetUseCase
+from application.useCases.addLayerUseCase import AddLayerUseCase
+from application.useCases.drawStrokeUseCase import DrawStrokeUseCase
+from application.useCases.saveAssetUseCase import SaveAssetUseCase
 
 from domain.entities.paintAppEntity import JankyPaint
-from domain.value_objects.brushSettingsValueObject import BrushSettings
-from domain.value_objects.colorValueObject import Color
-from domain.value_objects.pointValueObject import Point
+from src.domain.value_objects.brushSettingsValueObject import BrushSettings
+from src.domain.value_objects.colorValueObject import Color
+from src.domain.value_objects.pointValueObject import Point
 
-from infrastructure.persistence.pngAssetRepositoryPersistence import (
+from src.infrastructure.persistence.pngAssetRepositoryPersistence import (
     PNGAssetRepository,
 )
 
-from infrastructure.rendering.pilRendererRendering import (
+from src.infrastructure.rendering.pilRendererRendering import (
     PILRenderer,
 )
 

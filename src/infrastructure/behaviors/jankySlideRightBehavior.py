@@ -1,5 +1,5 @@
-from domain.entities.jankyEntity import LoreEntity
-from domain.services.jankyBehaviorService import EntityBehavior
+from src.domain.entities.jankyEntity import LoreEntity
+from src.domain.services.jankyBehaviorService import EntityBehavior
 
 
 class JankySlideRight(EntityBehavior):

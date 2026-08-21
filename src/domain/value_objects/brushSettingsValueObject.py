@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 
-from domain.value_objects.colorValueObject import Color
-from domain.enums.paintToolEnum import PaintTool
+from src.domain.value_objects.colorValueObject import Color
+from src.domain.enums.paintToolEnum import PaintTool
 
 
 @dataclass(frozen=True)

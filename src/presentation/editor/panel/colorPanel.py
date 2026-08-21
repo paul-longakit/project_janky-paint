@@ -3,7 +3,7 @@ import colorsys
 
 from PIL import Image, ImageTk
 
-from domain.value_objects.colorValueObject import Color
+from src.domain.value_objects.colorValueObject import Color
 
 
 class ColorPanel(tk.LabelFrame):

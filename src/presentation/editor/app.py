@@ -3,18 +3,18 @@ import tkinter as tk
 
 from PIL import ImageTk
 
-from application.useCases.createDocumentUseCase import CreateDocumentUseCase
-from application.useCases.saveAssetUseCase import SaveAssetUseCase
+from src.application.useCases.createDocumentUseCase import CreateDocumentUseCase
+from src.application.useCases.saveAssetUseCase import SaveAssetUseCase
 
-from infrastructure.persistence.pngAssetRepositoryPersistence import PNGAssetRepository
-from infrastructure.rendering.pilRendererRendering import PILRenderer
+from src.infrastructure.persistence.pngAssetRepositoryPersistence import PNGAssetRepository
+from src.infrastructure.rendering.pilRendererRendering import PILRenderer
 
-from presentation.editor.controller.editorController import EditorController
-from presentation.editor.panel.colorPanel import ColorPanel
+from src.presentation.editor.controller.editorController import EditorController
+from src.presentation.editor.panel.colorPanel import ColorPanel
 
-from domain.value_objects.colorValueObject import Color
-from domain.enums.paintToolEnum import PaintTool
-from domain.value_objects.pointValueObject import Point
+from src.domain.value_objects.colorValueObject import Color
+from src.domain.enums.paintToolEnum import PaintTool
+from src.domain.value_objects.pointValueObject import Point
 
 
 class JankyPaintApp:

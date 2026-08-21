@@ -1,7 +1,7 @@
 from domain.entities.paintAppEntity import JankyPaint
 from domain.entities.strokeEntity import Stroke
-from domain.value_objects.brushSettingsValueObject import BrushSettings
-from domain.value_objects.pointValueObject import Point
+from src.domain.value_objects.brushSettingsValueObject import BrushSettings
+from src.domain.value_objects.pointValueObject import Point
 
 
 class DrawStrokeUseCase:

@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-from domain.entities.jankyEntity import LoreEntity
+from src.domain.entities.jankyEntity import LoreEntity
 
 
 class EntityBehavior(ABC):
