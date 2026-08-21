@@ -1,0 +1,20 @@
+printf '\n===== ARCHITECTURE =====\n'; \
+tree -a -I '__pycache__|*.pyc|.git|.venv|venv|env|node_modules' --dirsfirst; \
+printf '\n===== PYTHON MODULES =====\n'; \
+find . -type f -name '*.py' \
+  -not -path '*/__pycache__/*' \
+  -not -path './.git/*' \
+  -not -path '*/.venv/*' \
+  -not -path '*/venv/*' \
+  | sort | while read f; do echo "$f"; done; \
+printf '\n===== CONFIGURATION =====\n'; \
+find . -maxdepth 3 -type f \( \
+  -name 'pyproject.toml' -o \
+  -name 'requirements*.txt' -o \
+  -name 'setup.py' -o \
+  -name 'setup.cfg' -o \
+  -name '.gitignore' -o \
+  -name '*.ini' -o \
+  -name '*.yaml' -o \
+  -name '*.yml' \
+\) -not -path '*/.git/*' | sort
