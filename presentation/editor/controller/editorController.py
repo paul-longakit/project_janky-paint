@@ -1,9 +1,9 @@
-from application.use_cases.fillAreaUseCase import FillAreaUseCase
-from application.use_cases.addLayerUseCase import AddLayerUseCase
-from application.use_cases.clearLayerUseCase import ClearLayerUseCase
-from application.use_cases.drawStrokeUseCase import DrawStrokeUseCase
-from application.use_cases.saveAssetUseCase import SaveAssetUseCase
-from application.use_cases.selectLayerUseCase import SelectLayerUseCase
+from application.useCases.fillAreaUseCase import FillAreaUseCase
+from application.useCases.addLayerUseCase import AddLayerUseCase
+from application.useCases.clearLayerUseCase import ClearLayerUseCase
+from application.useCases.drawStrokeUseCase import DrawStrokeUseCase
+from application.useCases.saveAssetUseCase import SaveAssetUseCase
+from application.useCases.selectLayerUseCase import SelectLayerUseCase
 
 
 from domain.entities.paintAppEntity import JankyPaint

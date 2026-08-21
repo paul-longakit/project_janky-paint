@@ -3,8 +3,8 @@ import tkinter as tk
 
 from PIL import ImageTk
 
-from application.use_cases.createDocumentUseCase import CreateDocumentUseCase
-from application.use_cases.saveAssetUseCase import SaveAssetUseCase
+from application.useCases.createDocumentUseCase import CreateDocumentUseCase
+from application.useCases.saveAssetUseCase import SaveAssetUseCase
 
 from infrastructure.persistence.pngAssetRepositoryPersistence import PNGAssetRepository
 from infrastructure.rendering.pilRendererRendering import PILRenderer
