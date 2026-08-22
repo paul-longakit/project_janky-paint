@@ -18,7 +18,7 @@ class PILRenderer(Renderer):
             (0, 0, 0, 0),
         )
 
-        for layer in paint.layers:
+        for layer in reversed(paint.layers):
 
             if not layer.visible:
                 continue

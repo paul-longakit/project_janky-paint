@@ -5,13 +5,15 @@ from src.application.useCases.drawStrokeUseCase import DrawStrokeUseCase
 from src.application.useCases.saveAssetUseCase import SaveAssetUseCase
 from src.application.useCases.selectLayerUseCase import SelectLayerUseCase
 from src.application.useCases.deleteLayerUseCase import DeleteLayerUseCase
-
+from src.application.useCases.reorderLayerUseCase import ReorderLayerUseCase
 
 from src.domain.entities.paintAppEntity import JankyPaintApp
+
+from src.domain.enums.paintToolEnum import PaintTool
+
+from src.domain.value_objects.pointValueObject import Point
 from src.domain.value_objects.brushSettingsValueObject import BrushSettings
 from src.domain.value_objects.colorValueObject import Color
-from src.domain.enums.paintToolEnum import PaintTool
-from src.domain.value_objects.pointValueObject import Point
 
 from src.domain.abstractions.rendererAbstraction import Renderer
 
@@ -38,6 +40,7 @@ class EditorController:
         self.fill_area_use_case = FillAreaUseCase(
             renderer=renderer,
         )
+        self.reorder_layer_use_case = ReorderLayerUseCase()
 
     def add_layer(self, name: str) -> None:
         self.add_layer_use_case.execute(
@@ -55,6 +58,18 @@ class EditorController:
         self.delete_layer_use_case.execute(
             paint=self.paint,
             layer_index=index,
+        )
+
+    def reorder_layer(
+        self,
+        from_index: int,
+        to_index: int,
+    ) -> None:
+
+        self.reorder_layer_use_case.execute(
+            paint=self.paint,
+            from_index=from_index,
+            to_index=to_index,
         )
 
     def draw_stroke(
