@@ -1,3 +1,5 @@
+from src.application.useCases.renameLayerUseCase import RenameLayerUseCase
+
 class LayerController:
 
     def __init__(
@@ -5,6 +7,7 @@ class LayerController:
         editor_controller,
     ):
         self.editor_controller = editor_controller
+        self.rename_layer_use_case = RenameLayerUseCase()
 
     # =============================================================
     # LAYER ACTIONS
@@ -54,6 +57,16 @@ class LayerController:
             to_index=to_index,
         )
 
+    def rename_layer(
+        self,
+        index: int,
+        name: str,
+    ) -> None:
+
+        self.editor_controller.rename_layer(
+            index=index,
+            name=name,
+        )
     # =============================================================
     # ACCESS
     # =============================================================

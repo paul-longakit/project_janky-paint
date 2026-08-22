@@ -1,3 +1,7 @@
+from copy import deepcopy
+
+from src.application.history.historyManager import HistoryManager
+
 from src.application.useCases.fillAreaUseCase import FillAreaUseCase
 from src.application.useCases.addLayerUseCase import AddLayerUseCase
 from src.application.useCases.clearLayerUseCase import ClearLayerUseCase
@@ -6,6 +10,9 @@ from src.application.useCases.saveAssetUseCase import SaveAssetUseCase
 from src.application.useCases.selectLayerUseCase import SelectLayerUseCase
 from src.application.useCases.deleteLayerUseCase import DeleteLayerUseCase
 from src.application.useCases.reorderLayerUseCase import ReorderLayerUseCase
+from src.application.useCases.renameLayerUseCase import RenameLayerUseCase
+from src.application.useCases.undoUseCase import UndoUseCase
+from src.application.useCases.redoUseCase import RedoUseCase
 
 from src.domain.entities.paintAppEntity import JankyPaintApp
 
@@ -24,6 +31,7 @@ class EditorController:
         paint: JankyPaintApp,
         renderer: Renderer,
         save_asset_use_case: SaveAssetUseCase,
+        on_history_change=None,
     ):
         self.paint: JankyPaintApp = paint
         self.current_tool = PaintTool.BRUSH
@@ -31,6 +39,12 @@ class EditorController:
         self.current_brush_size = 5
         self.renderer = renderer
         self.save_asset_use_case = save_asset_use_case
+        self.on_history_change = on_history_change
+
+        self.history = HistoryManager()
+
+        self.undo_use_case = UndoUseCase()
+        self.redo_use_case = RedoUseCase()
 
         self.add_layer_use_case = AddLayerUseCase()
         self.select_layer_use_case = SelectLayerUseCase()
@@ -41,11 +55,15 @@ class EditorController:
             renderer=renderer,
         )
         self.reorder_layer_use_case = ReorderLayerUseCase()
+        self.rename_layer_use_case = RenameLayerUseCase()
 
     def add_layer(self, name: str) -> None:
-        self.add_layer_use_case.execute(
-            paint=self.paint,
-            name=name,
+
+        self._execute_with_history(
+            lambda: self.add_layer_use_case.execute(
+                paint=self.paint,
+                name=name,
+            )
         )
 
     def select_layer(self, index: int) -> None:
@@ -54,10 +72,30 @@ class EditorController:
             layer_index=index,
         )
 
-    def delete_layer(self, index: int) -> None:
-        self.delete_layer_use_case.execute(
-            paint=self.paint,
-            layer_index=index,
+    def rename_layer(
+        self,
+        index: int,
+        name: str,
+    ) -> None:
+
+        self._execute_with_history(
+            lambda: self.rename_layer_use_case.execute(
+                paint=self.paint,
+                index=index,
+                name=name,
+            )
+        )
+
+    def delete_layer(
+        self,
+        index: int,
+    ) -> None:
+
+        self._execute_with_history(
+            lambda: self.delete_layer_use_case.execute(
+                paint=self.paint,
+                layer_index=index,
+            )
         )
 
     def reorder_layer(
@@ -66,10 +104,12 @@ class EditorController:
         to_index: int,
     ) -> None:
 
-        self.reorder_layer_use_case.execute(
-            paint=self.paint,
-            from_index=from_index,
-            to_index=to_index,
+        self._execute_with_history(
+            lambda: self.reorder_layer_use_case.execute(
+                paint=self.paint,
+                from_index=from_index,
+                to_index=to_index,
+            )
         )
 
     def draw_stroke(
@@ -83,15 +123,20 @@ class EditorController:
             tool=self.current_tool,
         )
 
-        self.draw_stroke_use_case.execute(
-            paint=self.paint,
-            points=points,
-            settings=settings,
+        self._execute_with_history(
+            lambda: self.draw_stroke_use_case.execute(
+                paint=self.paint,
+                points=points,
+                settings=settings,
+            )
         )
 
     def clear_layer(self) -> None:
-        self.clear_layer_use_case.execute(
-            paint=self.paint,
+
+        self._execute_with_history(
+            lambda: self.clear_layer_use_case.execute(
+                paint=self.paint,
+            )
         )
 
     def save(self, path: str) -> None:
@@ -114,9 +159,70 @@ class EditorController:
     def set_brush_size(self, size: int) -> None:
         self.current_brush_size = size
     
-    def fill_area(self, point: Point) -> None:
-        self.fill_area_use_case.execute(
-            paint=self.paint,
-            point=point,
-            color=self.current_color,
+    def fill_area(
+        self,
+        point: Point,
+    ) -> None:
+
+        self._execute_with_history(
+            lambda: self.fill_area_use_case.execute(
+                paint=self.paint,
+                point=point,
+                color=self.current_color,
+            )
         )
+
+    def _execute_with_history(
+        self,
+        operation,
+    ) -> None:
+
+        before = deepcopy(
+            self.paint
+        )
+
+        operation()
+
+        after = deepcopy(
+            self.paint
+        )
+
+        self.history.record(
+            before=before,
+            after=after,
+        )
+
+        if self.on_history_change:
+            self.on_history_change()
+
+    def undo(self) -> bool:
+
+        result = self.undo_use_case.execute(
+            paint=self.paint,
+            history=self.history,
+        )
+
+        if result and self.on_history_change:
+            self.on_history_change()
+
+        return result
+
+    def redo(self) -> bool:
+
+        result = self.redo_use_case.execute(
+            paint=self.paint,
+            history=self.history,
+        )
+
+        if result and self.on_history_change:
+            self.on_history_change()
+
+        return result
+
+    def can_undo(self) -> bool:
+
+        return self.history.can_undo()
+
+    def can_redo(self) -> bool:
+
+        return self.history.can_redo()

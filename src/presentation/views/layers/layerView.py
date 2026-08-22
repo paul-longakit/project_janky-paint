@@ -590,6 +590,7 @@ class LayerView:
                 on_mouse_down=self._on_mouse_down,
                 on_mouse_move=self._on_mouse_move,
                 on_mouse_up=self._on_mouse_up,
+                on_rename=self._rename_layer,
             )
 
             item.pack()
@@ -597,6 +598,30 @@ class LayerView:
             self.layer_items.append(
                 item
             )
+
+    # =============================================================
+    # RENAME
+    # =============================================================
+
+    def _rename_layer(
+        self,
+        index: int,
+        name: str,
+    ) -> None:
+
+        try:
+
+            self.layer_controller.rename_layer(
+                index=index,
+                name=name,
+            )
+
+        except ValueError:
+            return
+
+        self.refresh()
+
+        self._notify_layer_change()
 
     # =============================================================
     # DISPLAY

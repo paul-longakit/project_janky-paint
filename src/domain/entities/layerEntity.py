@@ -31,6 +31,14 @@ class Layer:
         self.operations.clear()
 
     def rename(self, name: str) -> None:
+
+        name = name.strip()
+
+        if not name:
+            raise ValueError(
+                "Layer name cannot be empty."
+            )
+
         self.name = name
 
     def set_visibility(self, visible: bool) -> None:

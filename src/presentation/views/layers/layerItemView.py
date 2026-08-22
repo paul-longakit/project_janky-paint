@@ -12,8 +12,10 @@ class LayerItemView:
         on_mouse_down,
         on_mouse_move,
         on_mouse_up,
+        on_rename,
     ):
         self.index = index
+        self.on_rename = on_rename
 
         self.frame = tk.Frame(
             parent,
@@ -65,6 +67,112 @@ class LayerItemView:
                     event,
                 ),
             )
+
+        # =========================================================
+        # RENAME
+        # =========================================================
+
+        self.label.bind(
+            "<Double-Button-1>",
+            self._start_rename,
+        )
+
+    # =============================================================
+    # RENAME
+    # =============================================================
+
+    def _start_rename(
+        self,
+        event,
+    ):
+
+        current_name = self.label.cget("text")
+
+        self.label.pack_forget()
+
+        self.rename_entry = tk.Entry(
+            self.frame,
+        )
+
+        self.rename_entry.insert(
+            0,
+            current_name,
+        )
+
+        self.rename_entry.select_range(
+            0,
+            tk.END,
+        )
+
+        self.rename_entry.pack(
+            fill=tk.X,
+            padx=3,
+            pady=2,
+        )
+
+        self.rename_entry.focus_set()
+
+        self.rename_entry.bind(
+            "<Return>",
+            self._confirm_rename,
+        )
+
+        self.rename_entry.bind(
+            "<Escape>",
+            self._cancel_rename,
+        )
+
+        self.rename_entry.bind(
+            "<FocusOut>",
+            self._confirm_rename,
+        )
+
+    def _confirm_rename(
+        self,
+        event=None,
+    ):
+
+        if not hasattr(
+            self,
+            "rename_entry",
+        ):
+            return
+
+        name = self.rename_entry.get().strip()
+
+        if not name:
+            self._cancel_rename()
+            return
+
+        self.on_rename(
+            self.index,
+            name,
+        )
+
+    def _cancel_rename(
+        self,
+        event=None,
+    ):
+
+        if not hasattr(
+            self,
+            "rename_entry",
+        ):
+            return
+
+        self.rename_entry.destroy()
+
+        del self.rename_entry
+
+        self.label.pack(
+            fill=tk.X,
+            padx=5,
+            pady=4,
+        )
+
+    # =============================================================
+    # DISPLAY
+    # =============================================================
 
     def pack(self) -> None:
 

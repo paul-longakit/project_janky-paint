@@ -13,6 +13,7 @@ from src.presentation.controllers.layerController import LayerController
 from src.presentation.views.canvas.canvasView import CanvasView
 from src.presentation.views.editor.editorView import EditorView
 from src.presentation.views.toolbar.toolbarView import ToolbarView
+from src.presentation.views.topbar.topBarView import TopBarView
 
 from src.domain.enums.paintToolEnum import PaintTool
 from src.domain.value_objects.colorValueObject import Color
@@ -23,6 +24,25 @@ class JankyPaintApp:
     def __init__(self, root: tk.Tk):
         self.root = root
         self.root.title("JankyPaint 95")
+
+        # =========================================================
+        # UNDO / REDO SHORTCUTS
+        # =========================================================
+
+        self.root.bind(
+            "<Control-z>",
+            self._undo,
+        )
+
+        self.root.bind(
+            "<Control-y>",
+            self._redo,
+        )
+
+        self.root.bind(
+            "<Control-Shift-Z>",
+            self._redo,
+        )
 
         # =========================================================
         # APPLICATION / DOMAIN SETUP
@@ -49,11 +69,24 @@ class JankyPaintApp:
             paint=paint,
             renderer=renderer,
             save_asset_use_case=save_asset,
+            on_history_change=self._update_history_buttons,
         )
 
         self.layer_controller = LayerController(
             editor_controller=self.controller,
         )
+
+        # =========================================================
+        # TOP BAR
+        # =========================================================
+
+        self.top_bar = TopBarView(
+            parent=self.root,
+            on_undo=self._undo,
+            on_redo=self._redo,
+        )
+
+        self.top_bar.pack()
 
         # =========================================================
         # TOOLBAR
@@ -102,6 +135,7 @@ class JankyPaintApp:
         # =========================================================
 
         self._refresh_canvas()
+        self._update_history_buttons()
 
     # =============================================================
     # TOOL HANDLERS
@@ -157,4 +191,41 @@ class JankyPaintApp:
 
         self.canvas_view.display_image(
             image
+        )
+
+    # =============================================================
+    # HISTORY
+    # =============================================================
+
+    def _undo(
+        self,
+        event=None,
+    ) -> str:
+
+        if self.controller.undo():
+
+            self.view.layer_view.refresh()
+
+            self._refresh_canvas()
+
+        return "break"
+
+    def _redo(
+        self,
+        event=None,
+    ) -> str:
+
+        if self.controller.redo():
+
+            self.view.layer_view.refresh()
+
+            self._refresh_canvas()
+
+        return "break"
+
+    def _update_history_buttons(self) -> None:
+
+        self.top_bar.set_history_state(
+            can_undo=self.controller.can_undo(),
+            can_redo=self.controller.can_redo(),
         )
