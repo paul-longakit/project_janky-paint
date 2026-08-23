@@ -13,6 +13,7 @@ class LayerItemView:
         on_mouse_move,
         on_mouse_up,
         on_rename,
+        on_delete,
     ):
         self.index = index
         self.on_rename = on_rename
@@ -30,9 +31,28 @@ class LayerItemView:
         )
 
         self.label.pack(
+            side=tk.LEFT,
             fill=tk.X,
+            expand=True,
             padx=5,
             pady=4,
+        )
+
+        tk.Button(
+            self.frame,
+            text="-",
+            width=1,
+            height=1,
+            fg="white",
+            bg="#d9534f",
+            activeforeground="white",
+            activebackground="#c9302c",
+            command=lambda: on_delete(
+                self.index
+            ),
+        ).pack(
+            side=tk.RIGHT,
+            padx=3,
         )
 
         # =========================================================

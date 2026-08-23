@@ -21,6 +21,10 @@ class LayerView:
             bd=2,
         )
 
+        self.frame.pack_propagate(
+            False,
+        )
+
         self.layer_items = []
 
         # =========================================================
@@ -41,7 +45,6 @@ class LayerView:
 
         self._build_header()
         self._build_layer_list()
-        self._build_controls()
 
         self.drag_controller.layer_list = self.layer_list
 
@@ -53,14 +56,35 @@ class LayerView:
 
     def _build_header(self) -> None:
 
-        tk.Label(
+        header = tk.Frame(
             self.frame,
-            text="Layers",
-            font=("Arial", 10, "bold"),
-        ).pack(
+        )
+
+        header.pack(
             fill=tk.X,
             padx=5,
             pady=(5, 2),
+        )
+
+        tk.Label(
+            header,
+            text="Layers",
+            font=("Arial", 10, "bold"),
+        ).pack(
+            side=tk.LEFT,
+        )
+
+        tk.Button(
+            header,
+            text="+",
+            width=1,
+            fg="white",
+            bg="#5cb85c",
+            activeforeground="white",
+            activebackground="#449d44",
+            command=self._add_layer,
+        ).pack(
+            side=tk.RIGHT,
         )
 
     # =============================================================
@@ -85,38 +109,7 @@ class LayerView:
     # =============================================================
 
     def _build_controls(self) -> None:
-
-        controls = tk.Frame(
-            self.frame,
-        )
-
-        controls.pack(
-            fill=tk.X,
-            padx=5,
-            pady=(0, 5),
-        )
-
-        tk.Button(
-            controls,
-            text="+",
-            command=self._add_layer,
-        ).pack(
-            side=tk.LEFT,
-            expand=True,
-            fill=tk.X,
-            padx=1,
-        )
-
-        tk.Button(
-            controls,
-            text="-",
-            command=self._delete_layer,
-        ).pack(
-            side=tk.LEFT,
-            expand=True,
-            fill=tk.X,
-            padx=1,
-        )
+        pass
 
     # =============================================================
     # LAYER ACTIONS
@@ -274,6 +267,7 @@ class LayerView:
                 on_mouse_move=self._on_mouse_move,
                 on_mouse_up=self._on_mouse_up,
                 on_rename=self._rename_layer,
+                on_delete=self._delete_layer_at,
             )
 
             item.pack()
@@ -311,13 +305,7 @@ class LayerView:
     # =============================================================
 
     def pack(self) -> None:
-
-        self.frame.pack(
-            side=tk.RIGHT,
-            fill=tk.Y,
-            padx=5,
-            pady=5,
-        )
+        pass
 
     # =============================================================
     # CALLBACK
@@ -335,3 +323,18 @@ class LayerView:
     def get_widget(self) -> tk.Frame:
 
         return self.frame
+    
+    def _delete_layer_at(
+        self,
+        index: int,
+    ) -> None:
+
+        self.layer_controller.select_layer(
+            index
+        )
+
+        self.layer_controller.delete_layer()
+
+        self.refresh()
+
+        self._notify_layer_change()

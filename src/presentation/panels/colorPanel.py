@@ -59,21 +59,69 @@ class ColorPanel(tk.LabelFrame):
         )
 
         # =====================================================
+        # SCROLL CONTAINER
+        # =====================================================
+
+        self._scroll_container = tk.Frame(
+            self,
+        )
+
+        self._scroll_container.pack(
+            fill=tk.BOTH,
+            expand=True,
+        )
+
+        self._scroll_canvas = tk.Canvas(
+            self._scroll_container,
+            highlightthickness=0,
+            borderwidth=0,
+        )
+
+        self._scrollbar = tk.Scrollbar(
+            self._scroll_container,
+            orient=tk.VERTICAL,
+            command=self._scroll_canvas.yview,
+        )
+
+        self._scroll_canvas.configure(
+            yscrollcommand=self._scrollbar.set,
+        )
+
+        self._scroll_canvas.pack(
+            side=tk.LEFT,
+            fill=tk.BOTH,
+            expand=True,
+        )
+
+        self._content_frame = tk.Frame(
+            self._scroll_canvas,
+        )
+
+        self._canvas_window = (
+            self._scroll_canvas.create_window(
+                0,
+                0,
+                window=self._content_frame,
+                anchor=tk.NW,
+            )
+        )
+
+        # =====================================================
         # COMPONENTS
         # =====================================================
 
         self._color_field = ColorFieldView(
-            self,
+            self._content_frame,
             on_change=self._on_field_change,
         )
 
         self._hue_slider = HueSliderView(
-            self,
+            self._content_frame,
             on_change=self._on_hue_change,
         )
 
         self._color_info = ColorInfoView(
-            self,
+            self._content_frame,
             on_hex_change=self._on_hex_change,
         )
 
@@ -84,7 +132,7 @@ class ColorPanel(tk.LabelFrame):
         self._color_field.pack()
 
         tk.Label(
-            self,
+            self._content_frame,
             text="Hue",
             anchor="w",
         ).pack(
@@ -94,6 +142,30 @@ class ColorPanel(tk.LabelFrame):
         self._hue_slider.pack()
 
         self._color_info.pack()
+
+        # =====================================================
+        # RESPONSIVE SCROLLING
+        # =====================================================
+
+        self._content_frame.bind(
+            "<Configure>",
+            self._on_content_configure,
+        )
+
+        self._scroll_canvas.bind(
+            "<Configure>",
+            self._on_canvas_configure,
+        )
+
+        self.bind(
+            "<Configure>",
+            self._on_panel_configure,
+        )
+
+        self._scroll_canvas.bind(
+            "<MouseWheel>",
+            self._on_mousewheel,
+        )
 
         # =====================================================
         # INITIAL COLOR
@@ -218,4 +290,121 @@ class ColorPanel(tk.LabelFrame):
 
         self._on_color_change(
             color
+        )
+
+    # =========================================================
+    # RESPONSIVE SCROLLING
+    # =========================================================
+
+    def _on_content_configure(
+        self,
+        _event=None,
+    ) -> None:
+
+        self._scroll_canvas.configure(
+            scrollregion=(
+                self._scroll_canvas
+                .bbox("all")
+            )
+        )
+
+        self.after_idle(
+            self._update_scrollbar
+        )
+
+    def _on_canvas_configure(
+        self,
+        event,
+    ) -> None:
+
+        self._scroll_canvas.itemconfigure(
+            self._canvas_window,
+            width=event.width,
+        )
+
+        self.after_idle(
+            self._update_scrollbar
+        )
+
+    def _on_panel_configure(
+        self,
+        _event=None,
+    ) -> None:
+
+        self.after_idle(
+            self._update_scrollbar
+        )
+
+    def _update_scrollbar(
+        self,
+    ) -> None:
+
+        self.update_idletasks()
+
+        content_height = (
+            self._content_frame
+            .winfo_reqheight()
+        )
+
+        available_height = (
+            self._scroll_canvas
+            .winfo_height()
+        )
+
+        # -----------------------------------------------------
+        # Everything fits.
+        # Hide the scrollbar.
+        # -----------------------------------------------------
+
+        if (
+            available_height <= 1
+            or content_height <= available_height
+        ):
+
+            self._scrollbar.place_forget()
+
+            self._scroll_canvas.yview_moveto(
+                0
+            )
+
+            return
+
+        # -----------------------------------------------------
+        # Content is larger than the available space.
+        # Show the scrollbar without stealing width.
+        # -----------------------------------------------------
+
+        self._scrollbar.place(
+            relx=1.0,
+            rely=0.0,
+            relheight=1.0,
+            anchor=tk.NE,
+        )
+
+        self._scroll_canvas.configure(
+            scrollregion=(
+                self._scroll_canvas
+                .bbox("all")
+            )
+        )
+
+    # =========================================================
+    # MOUSE WHEEL
+    # =========================================================
+
+    def _on_mousewheel(
+        self,
+        event,
+    ) -> None:
+
+        if not self._scrollbar.winfo_ismapped():
+            return
+
+        self._scroll_canvas.yview_scroll(
+            int(
+                -1 * (
+                    event.delta / 120
+                )
+            ),
+            "units",
         )

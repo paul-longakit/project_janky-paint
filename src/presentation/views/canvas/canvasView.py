@@ -5,6 +5,10 @@ from PIL import ImageTk
 
 class CanvasView:
 
+    TRANSPARENCY_TILE_SIZE = 10
+    TRANSPARENCY_LIGHT = "#ffffff"
+    TRANSPARENCY_DARK = "#d9d9d9"
+
     def __init__(
         self,
         parent,
@@ -28,14 +32,29 @@ class CanvasView:
         )
 
         # =========================================================
+        # CANVAS PADDING
+        # =========================================================
+
+        self._canvas_container = tk.Frame(
+            self._workspace,
+            bg="#d0d0d0",
+        )
+
+        self._canvas_container.pack(
+            fill=tk.BOTH,
+            expand=True,
+            padx=20,
+            pady=20,
+        )
+
+        # =========================================================
         # CANVAS
         # =========================================================
 
         self._canvas = tk.Canvas(
-            self._workspace,
+            self._canvas_container,
             width=width,
             height=height,
-            bg="white",
             highlightthickness=1,
             highlightbackground="black",
             cursor="crosshair",
@@ -49,7 +68,62 @@ class CanvasView:
             height=height,
         )
 
+        # =========================================================
+        # IMAGE
+        # =========================================================
+
         self.tk_image = None
+
+        # =========================================================
+        # TRANSPARENCY BACKGROUND
+        # =========================================================
+
+        self._create_transparency_background()
+
+    # =============================================================
+    # TRANSPARENCY BACKGROUND
+    # =============================================================
+
+    def _create_transparency_background(
+        self,
+    ) -> None:
+
+        tile_size = self.TRANSPARENCY_TILE_SIZE
+
+        for row, y in enumerate(
+            range(
+                0,
+                self._height,
+                tile_size,
+            )
+        ):
+            for column, x in enumerate(
+                range(
+                    0,
+                    self._width,
+                    tile_size,
+                )
+            ):
+
+                color = (
+                    self.TRANSPARENCY_LIGHT
+                    if (row + column) % 2 == 0
+                    else self.TRANSPARENCY_DARK
+                )
+
+                self._canvas.create_rectangle(
+                    x,
+                    y,
+                    x + tile_size,
+                    y + tile_size,
+                    fill=color,
+                    outline=color,
+                    tags="transparency_background",
+                )
+
+        self._canvas.tag_lower(
+            "transparency_background"
+        )
 
     # =============================================================
     # EVENTS
@@ -79,8 +153,10 @@ class CanvasView:
             image
         )
 
+        # Remove only the previous image.
+        # Do NOT delete the transparency background.
         self._canvas.delete(
-            "all"
+            "canvas_image"
         )
 
         self._canvas.create_image(
@@ -88,6 +164,14 @@ class CanvasView:
             0,
             anchor=tk.NW,
             image=self.tk_image,
+            tags="canvas_image",
+        )
+
+        # Make sure the image stays above
+        # the transparency background.
+        self._canvas.tag_raise(
+            "canvas_image",
+            "transparency_background",
         )
 
     # =============================================================
@@ -113,6 +197,7 @@ class CanvasView:
             width=width,
             capstyle=tk.ROUND,
             smooth=True,
+            tags="stroke_preview",
         )
 
     def remove_preview(
