@@ -12,17 +12,10 @@ class ToolbarView:
         on_bucket,
         on_brush_size_change,
     ):
-        self.toolbar = tk.Frame(
+        self._toolbar = tk.Frame(
             parent,
             relief=tk.RAISED,
             bd=2,
-        )
-
-        self.toolbar.pack(
-            side=tk.LEFT,
-            fill=tk.Y,
-            padx=5,
-            pady=5,
         )
 
         self._build_tool_buttons(
@@ -48,7 +41,7 @@ class ToolbarView:
     ) -> None:
 
         tk.Button(
-            self.toolbar,
+            self._toolbar,
             text="🖌 Brush",
             command=on_brush,
         ).pack(
@@ -57,7 +50,7 @@ class ToolbarView:
         )
 
         tk.Button(
-            self.toolbar,
+            self._toolbar,
             text="🧼 Eraser",
             command=on_eraser,
         ).pack(
@@ -66,7 +59,7 @@ class ToolbarView:
         )
 
         tk.Button(
-            self.toolbar,
+            self._toolbar,
             text="🪣 Bucket",
             command=on_bucket,
         ).pack(
@@ -85,14 +78,14 @@ class ToolbarView:
     ) -> None:
 
         tk.Label(
-            self.toolbar,
+            self._toolbar,
             text="Size:",
         ).pack(
             pady=(15, 2),
         )
 
         self.size_slider = tk.Scale(
-            self.toolbar,
+            self._toolbar,
             from_=1,
             to=30,
             orient=tk.HORIZONTAL,
@@ -106,3 +99,11 @@ class ToolbarView:
         self.size_slider.pack(
             fill=tk.X,
         )
+
+    # =============================================================
+    # WIDGET
+    # =============================================================
+
+    def get_widget(self) -> tk.Frame:
+
+        return self._toolbar

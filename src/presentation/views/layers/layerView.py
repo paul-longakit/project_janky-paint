@@ -1,11 +1,10 @@
 import tkinter as tk
 
 from src.presentation.views.layers.layerItemView import LayerItemView
+from src.presentation.controllers.layerDragController import LayerDragController
 
 
 class LayerView:
-
-    DRAG_THRESHOLD = 5
 
     def __init__(
         self,
@@ -25,21 +24,16 @@ class LayerView:
         self.layer_items = []
 
         # =========================================================
-        # DRAG STATE
+        # DRAG CONTROLLER
         # =========================================================
 
-        self.mouse_down = False
-        self.dragging = False
-
-        self.dragged_index = None
-
-        self.start_x = 0
-        self.start_y = 0
-
-        self.drop_index = None
-
-        self.drag_preview = None
-        self.drop_indicator = None
+        self.drag_controller = LayerDragController(
+            layer_list=None,
+            get_layer_items=lambda: self.layer_items,
+            get_layers=self.layer_controller.get_layers,
+            reorder_layer=self.layer_controller.reorder_layer,
+            on_reorder_complete=self._on_reorder_complete,
+        )
 
         # =========================================================
         # BUILD
@@ -48,6 +42,8 @@ class LayerView:
         self._build_header()
         self._build_layer_list()
         self._build_controls()
+
+        self.drag_controller.layer_list = self.layer_list
 
         self.refresh()
 
@@ -165,24 +161,18 @@ class LayerView:
         event,
     ) -> None:
 
-        if self.mouse_down:
+        if self.drag_controller.mouse_down:
             return
 
         # ---------------------------------------------------------
         # SELECT LAYER
         # ---------------------------------------------------------
-        #
-        # IMPORTANT:
-        # Do NOT call _select_layer() here because _select_layer()
-        # calls refresh(), and refresh() resets the drag state.
-        #
 
         self.layer_controller.select_layer(
             index
         )
 
-        # Update the visual selection without rebuilding the
-        # LayerItemViews.
+        # Update selection visually without refresh.
         for item_index, item in enumerate(
             self.layer_items
         ):
@@ -196,18 +186,13 @@ class LayerView:
             )
 
         # ---------------------------------------------------------
-        # START DRAG STATE
+        # START DRAG
         # ---------------------------------------------------------
 
-        self.mouse_down = True
-        self.dragging = False
-
-        self.dragged_index = index
-
-        self.start_x = event.x_root
-        self.start_y = event.y_root
-
-        self.drop_index = index
+        self.drag_controller.on_mouse_down(
+            index,
+            event,
+        )
 
         self._notify_layer_change()
 
@@ -221,68 +206,10 @@ class LayerView:
         event,
     ) -> None:
 
-        if not self.mouse_down:
-            return
-
-        if self.dragged_index != index:
-            return
-
-        delta_x = abs(
-            event.x_root - self.start_x
+        self.drag_controller.on_mouse_move(
+            index,
+            event,
         )
-
-        delta_y = abs(
-            event.y_root - self.start_y
-        )
-
-        # ---------------------------------------------------------
-        # START DRAG
-        # ---------------------------------------------------------
-
-        if not self.dragging:
-
-            if (
-                delta_x < self.DRAG_THRESHOLD
-                and delta_y < self.DRAG_THRESHOLD
-            ):
-                return
-
-            self.dragging = True
-
-            dragged_index = self.dragged_index
-
-            if dragged_index is None:
-                return
-
-            self._create_drag_preview(
-                dragged_index,
-                event,
-            )
-
-        # ---------------------------------------------------------
-        # MOVE PREVIEW
-        # ---------------------------------------------------------
-
-        self._move_drag_preview(
-            event
-        )
-
-        # ---------------------------------------------------------
-        # DROP SLOT
-        # ---------------------------------------------------------
-
-        target_index = self._get_drop_index(
-            event
-        )
-
-        if target_index is None:
-            return
-
-        if target_index != self.drop_index:
-
-            self.drop_index = target_index
-
-            self._update_drop_indicator()
 
     # =============================================================
     # MOUSE UP
@@ -294,264 +221,20 @@ class LayerView:
         event,
     ) -> None:
 
-        if not self.mouse_down:
-            return
-
-        if self.dragging:
-
-            self._finish_drag(
-                self.dragged_index,
-                self.drop_index,
-            )
-
-        self._reset_drag_state()
-
-    # =============================================================
-    # FINISH DRAG
-    # =============================================================
-
-    def _finish_drag(
-        self,
-        from_index,
-        to_index,
-    ) -> None:
-
-        self._destroy_drag_preview()
-        self._destroy_drop_indicator()
-
-        if from_index is None:
-            return
-
-        if to_index is None:
-            return
-
-        layers = self.layer_controller.get_layers()
-
-        if not layers:
-            return
-
-        # ---------------------------------------------------------
-        # CONVERT DROP SLOT TO FINAL INDEX
-        # ---------------------------------------------------------
-
-        final_index = to_index
-
-        if to_index > from_index:
-            final_index -= 1
-
-        final_index = max(
-            0,
-            min(
-                final_index,
-                len(layers) - 1,
-            ),
+        self.drag_controller.on_mouse_up(
+            index,
+            event,
         )
 
-        if from_index == final_index:
-            return
+    # =============================================================
+    # REORDER CALLBACK
+    # =============================================================
 
-        self.layer_controller.reorder_layer(
-            from_index=from_index,
-            to_index=final_index,
-        )
+    def _on_reorder_complete(self) -> None:
 
         self.refresh()
 
         self._notify_layer_change()
-
-    # =============================================================
-    # RESET
-    # =============================================================
-
-    def _reset_drag_state(self) -> None:
-
-        self.mouse_down = False
-        self.dragging = False
-
-        self.dragged_index = None
-        self.drop_index = None
-
-        self.start_x = 0
-        self.start_y = 0
-
-        self._destroy_drag_preview()
-        self._destroy_drop_indicator()
-
-    # =============================================================
-    # DROP TARGET
-    # =============================================================
-
-    def _get_drop_index(
-        self,
-        event,
-    ):
-        if not self.layer_items:
-            return None
-
-        mouse_y = (
-            event.y_root
-            - self.layer_list.winfo_rooty()
-        )
-
-        for index, item in enumerate(
-            self.layer_items
-        ):
-
-            item.frame.update_idletasks()
-
-            top = item.frame.winfo_y()
-            height = item.frame.winfo_height()
-
-            middle = top + (
-                height / 2
-            )
-
-            if mouse_y < middle:
-                return index
-
-        return len(
-            self.layer_items
-        )
-
-    # =============================================================
-    # DROP INDICATOR
-    # =============================================================
-
-    def _update_drop_indicator(self) -> None:
-
-        self._destroy_drop_indicator()
-
-        if self.drop_index is None:
-            return
-
-        if not self.layer_items:
-            return
-
-        if self.drop_index == 0:
-
-            target = self.layer_items[0]
-
-            target.frame.update_idletasks()
-
-            y = target.frame.winfo_y()
-
-        elif self.drop_index >= len(
-            self.layer_items
-        ):
-
-            target = self.layer_items[-1]
-
-            target.frame.update_idletasks()
-
-            y = (
-                target.frame.winfo_y()
-                + target.frame.winfo_height()
-            )
-
-        else:
-
-            target = self.layer_items[
-                self.drop_index
-            ]
-
-            target.frame.update_idletasks()
-
-            y = target.frame.winfo_y()
-
-        self.drop_indicator = tk.Frame(
-            self.layer_list,
-            height=3,
-            bg="black",
-        )
-
-        self.drop_indicator.place(
-            x=0,
-            y=y,
-            relwidth=1,
-        )
-
-        self.drop_indicator.lift()
-
-    def _destroy_drop_indicator(self) -> None:
-
-        if self.drop_indicator is not None:
-
-            self.drop_indicator.destroy()
-
-            self.drop_indicator = None
-
-    # =============================================================
-    # DRAG PREVIEW
-    # =============================================================
-
-    def _create_drag_preview(
-        self,
-        index: int,
-        event,
-    ) -> None:
-
-        if index < 0:
-            return
-
-        if index >= len(
-            self.layer_items
-        ):
-            return
-
-        item = self.layer_items[
-            index
-        ]
-
-        self.drag_preview = tk.Toplevel(
-            self.frame
-        )
-
-        self.drag_preview.overrideredirect(
-            True
-        )
-
-        self.drag_preview.attributes(
-            "-alpha",
-            0.75,
-        )
-
-        label = tk.Label(
-            self.drag_preview,
-            text=item.label.cget("text"),
-            relief=tk.RAISED,
-            bd=2,
-            padx=10,
-            pady=4,
-        )
-
-        label.pack()
-
-        self._move_drag_preview(
-            event
-        )
-
-    def _move_drag_preview(
-        self,
-        event,
-    ) -> None:
-
-        if self.drag_preview is None:
-            return
-
-        x = event.x_root + 10
-        y = event.y_root + 10
-
-        self.drag_preview.geometry(
-            f"+{x}+{y}"
-        )
-
-    def _destroy_drag_preview(self) -> None:
-
-        if self.drag_preview is not None:
-
-            self.drag_preview.destroy()
-
-            self.drag_preview = None
 
     # =============================================================
     # REFRESH
@@ -559,7 +242,7 @@ class LayerView:
 
     def refresh(self) -> None:
 
-        self._reset_drag_state()
+        self.drag_controller.reset()
 
         for item in self.layer_items:
             item.destroy()
@@ -644,3 +327,11 @@ class LayerView:
 
         if self.on_layer_change:
             self.on_layer_change()
+
+    # =============================================================
+    # WIDGET
+    # =============================================================
+
+    def get_widget(self) -> tk.Frame:
+
+        return self.frame

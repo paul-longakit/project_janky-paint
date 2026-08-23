@@ -5,7 +5,14 @@ from src.presentation.app.jankyPaintApp import JankyPaintApp
 
 def main():
     root = tk.Tk()
+    root.geometry(
+        "1200x800"
+    )
 
+    root.minsize(
+        1000,
+        700,
+    )
     JankyPaintApp(root)
 
     root.mainloop()

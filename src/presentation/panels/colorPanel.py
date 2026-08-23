@@ -1,7 +1,10 @@
-import colorsys
 import tkinter as tk
 
 from src.domain.value_objects.colorValueObject import Color
+
+from src.presentation.presenters.color.colorPickerPresenter import (
+    ColorPickerPresenter,
+)
 
 from src.presentation.state.colorPickerState import (
     ColorPickerState,
@@ -41,10 +44,22 @@ class ColorPanel(tk.LabelFrame):
             on_color_change
         )
 
+        # =====================================================
+        # STATE
+        # =====================================================
+
         self._state = ColorPickerState()
 
         # =====================================================
-        # VIEWS
+        # PRESENTER
+        # =====================================================
+
+        self._presenter = ColorPickerPresenter(
+            state=self._state,
+        )
+
+        # =====================================================
+        # COMPONENTS
         # =====================================================
 
         self._color_field = ColorFieldView(
@@ -63,7 +78,7 @@ class ColorPanel(tk.LabelFrame):
         )
 
         # =====================================================
-        # PACK
+        # LAYOUT
         # =====================================================
 
         self._color_field.pack()
@@ -97,33 +112,9 @@ class ColorPanel(tk.LabelFrame):
         color: Color,
     ) -> None:
 
-        red = color.red
-        green = color.green
-        blue = color.blue
-
-        hue, lightness, saturation = (
-            colorsys.rgb_to_hls(
-                red / 255,
-                green / 255,
-                blue / 255,
-            )
+        self._presenter.sync_from_color(
+            color
         )
-
-        # -----------------------------------------------------
-        # IMPORTANT
-        #
-        # Achromatic colors have no meaningful hue.
-        #
-        # Preserve the existing hue when the color has no
-        # saturation. This prevents black/white/gray from
-        # unexpectedly resetting the picker to red.
-        # -----------------------------------------------------
-
-        if saturation > 0:
-            self._state.hue = hue
-
-        self._state.saturation = saturation
-        self._state.lightness = lightness
 
         self._sync_views(
             color
@@ -168,10 +159,10 @@ class ColorPanel(tk.LabelFrame):
         lightness: float,
     ) -> None:
 
-        self._state.saturation = saturation
-        self._state.lightness = lightness
-
-        color = self._color_from_state()
+        color = self._presenter.update_field(
+            saturation,
+            lightness,
+        )
 
         self._color_info.set_color(
             color=color,
@@ -193,13 +184,13 @@ class ColorPanel(tk.LabelFrame):
         hue: float,
     ) -> None:
 
-        self._state.hue = hue
+        color = self._presenter.update_hue(
+            hue
+        )
 
         self._color_field.set_hue(
             hue
         )
-
-        color = self._color_from_state()
 
         self._color_info.set_color(
             color=color,
@@ -227,24 +218,4 @@ class ColorPanel(tk.LabelFrame):
 
         self._on_color_change(
             color
-        )
-
-    # =========================================================
-    # COLOR CONVERSION
-    # =========================================================
-
-    def _color_from_state(self) -> Color:
-
-        red, green, blue = (
-            colorsys.hls_to_rgb(
-                self._state.hue,
-                self._state.lightness,
-                self._state.saturation,
-            )
-        )
-
-        return Color(
-            round(red * 255),
-            round(green * 255),
-            round(blue * 255),
         )

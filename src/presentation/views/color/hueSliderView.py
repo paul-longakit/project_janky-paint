@@ -9,7 +9,7 @@ class HueSliderView:
 
     def __init__(
         self,
-        parent,
+        parent: tk.Widget,
         on_change,
     ):
         self._on_change = on_change
@@ -46,9 +46,8 @@ class HueSliderView:
         hue: float,
     ) -> None:
 
-        self._hue = max(
-            0.0,
-            min(1.0, hue),
+        self._hue = self._clamp(
+            hue
         )
 
         self._draw()
@@ -69,17 +68,30 @@ class HueSliderView:
             "gradient"
         )
 
+        self.canvas.delete(
+            "selector"
+        )
+
+        self._draw_gradient()
+        self._draw_selector()
+
+    def _draw_gradient(self) -> None:
+
         width = self.WIDTH
         height = self.HEIGHT
 
         for x in range(width):
 
-            hue = x / (width - 1)
+            hue = (
+                x / (width - 1)
+            )
 
-            red, green, blue = colorsys.hsv_to_rgb(
-                hue,
-                1.0,
-                1.0,
+            red, green, blue = (
+                colorsys.hsv_to_rgb(
+                    hue,
+                    1.0,
+                    1.0,
+                )
             )
 
             color = (
@@ -97,16 +109,18 @@ class HueSliderView:
                 tags="gradient",
             )
 
+    def _draw_selector(self) -> None:
+
         selector_x = int(
             self._hue
-            * (width - 1)
+            * (self.WIDTH - 1)
         )
 
         self.canvas.create_line(
             selector_x,
             0,
             selector_x,
-            height,
+            self.HEIGHT,
             fill="white",
             width=2,
             tags="selector",
@@ -128,7 +142,10 @@ class HueSliderView:
 
         x = max(
             0,
-            min(event.x, width - 1),
+            min(
+                event.x,
+                width - 1,
+            ),
         )
 
         self._hue = (
@@ -139,4 +156,21 @@ class HueSliderView:
 
         self._on_change(
             self._hue
+        )
+
+    # =========================================================
+    # UTILITIES
+    # =========================================================
+
+    @staticmethod
+    def _clamp(
+        value: float,
+    ) -> float:
+
+        return max(
+            0.0,
+            min(
+                1.0,
+                value,
+            ),
         )

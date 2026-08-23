@@ -10,10 +10,7 @@ from src.presentation.controllers.canvasController import CanvasController
 from src.presentation.controllers.editorController import EditorController
 from src.presentation.controllers.layerController import LayerController
 
-from src.presentation.views.canvas.canvasView import CanvasView
 from src.presentation.views.editor.editorView import EditorView
-from src.presentation.views.toolbar.toolbarView import ToolbarView
-from src.presentation.views.topbar.topBarView import TopBarView
 
 from src.domain.enums.paintToolEnum import PaintTool
 from src.domain.value_objects.colorValueObject import Color
@@ -76,32 +73,6 @@ class JankyPaintApp:
             editor_controller=self.controller,
         )
 
-        # =========================================================
-        # TOP BAR
-        # =========================================================
-
-        self.top_bar = TopBarView(
-            parent=self.root,
-            on_undo=self._undo,
-            on_redo=self._redo,
-        )
-
-        self.top_bar.pack()
-
-        # =========================================================
-        # TOOLBAR
-        # =========================================================
-
-        self.toolbar_view = ToolbarView(
-            parent=self.root,
-            current_brush_size=self.controller.current_brush_size,
-
-            on_brush=self._use_brush,
-            on_eraser=self._use_eraser,
-            on_bucket=self._use_bucket,
-
-            on_brush_size_change=self._on_brush_size_change,
-        )
 
         # =========================================================
         # EDITOR VIEW
@@ -111,23 +82,20 @@ class JankyPaintApp:
             root=self.root,
             controller=self.controller,
             layer_controller=self.layer_controller,
-            toolbar=self.toolbar_view.toolbar,
+
+            on_undo=self._undo,
+            on_redo=self._redo,
 
             on_color_change=self._on_color_change,
             on_layer_change=self._on_layer_change,
-        )
 
-        # =========================================================
-        # CANVAS
-        # =========================================================
+            on_brush=self._use_brush,
+            on_eraser=self._use_eraser,
+            on_bucket=self._use_bucket,
 
-        self.canvas_view = CanvasView(
-            parent=self.root,
-        )
-
-        self.canvas_controller = CanvasController(
-            editor_controller=self.controller,
-            canvas_view=self.canvas_view,
+            on_brush_size_change=(
+                self._on_brush_size_change
+            ),
         )
 
         # =========================================================
@@ -137,6 +105,10 @@ class JankyPaintApp:
         self._refresh_canvas()
         self._update_history_buttons()
 
+        self.canvas_controller = CanvasController(
+            editor_controller=self.controller,
+            canvas_view=self.view.canvas_view,
+        )
     # =============================================================
     # TOOL HANDLERS
     # =============================================================
@@ -189,7 +161,7 @@ class JankyPaintApp:
 
         image = self.controller.render()
 
-        self.canvas_view.display_image(
+        self.view.canvas_view.display_image(
             image
         )
 
@@ -204,8 +176,7 @@ class JankyPaintApp:
 
         if self.controller.undo():
 
-            self.view.layer_view.refresh()
-
+            self.view.refresh_layers()
             self._refresh_canvas()
 
         return "break"
@@ -225,7 +196,7 @@ class JankyPaintApp:
 
     def _update_history_buttons(self) -> None:
 
-        self.top_bar.set_history_state(
+        self.view.set_history_state(
             can_undo=self.controller.can_undo(),
             can_redo=self.controller.can_redo(),
         )

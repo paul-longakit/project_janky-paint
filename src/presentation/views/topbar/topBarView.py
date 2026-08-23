@@ -14,7 +14,7 @@ class TopBarView:
         self.on_undo = on_undo
         self.on_redo = on_redo
 
-        self.frame = tk.Frame(
+        self._frame = tk.Frame(
             parent,
             relief=tk.RAISED,
             bd=1,
@@ -24,11 +24,11 @@ class TopBarView:
         # LEFT SIDE
         # =========================================================
 
-        self.menu_frame = tk.Frame(
-            self.frame,
+        self._menu_frame = tk.Frame(
+            self._frame,
         )
 
-        self.menu_frame.pack(
+        self._menu_frame.pack(
             side=tk.LEFT,
             fill=tk.Y,
         )
@@ -39,11 +39,11 @@ class TopBarView:
         # RIGHT SIDE
         # =========================================================
 
-        self.action_frame = tk.Frame(
-            self.frame,
+        self._action_frame = tk.Frame(
+            self._frame,
         )
 
-        self.action_frame.pack(
+        self._action_frame.pack(
             side=tk.RIGHT,
             fill=tk.Y,
         )
@@ -70,7 +70,7 @@ class TopBarView:
     ) -> None:
 
         button = tk.Menubutton(
-            self.menu_frame,
+            self._menu_frame,
             text=text,
             relief=tk.FLAT,
             padx=10,
@@ -85,7 +85,7 @@ class TopBarView:
     def _build_file_menu(self) -> None:
 
         menu = tk.Menu(
-            self.menu_frame,
+            self._menu_frame,
             tearoff=False,
         )
 
@@ -122,7 +122,7 @@ class TopBarView:
     def _build_edit_menu(self) -> None:
 
         menu = tk.Menu(
-            self.menu_frame,
+            self._menu_frame,
             tearoff=False,
         )
 
@@ -158,7 +158,7 @@ class TopBarView:
     def _build_view_menu(self) -> None:
 
         menu = tk.Menu(
-            self.menu_frame,
+            self._menu_frame,
             tearoff=False,
         )
 
@@ -182,7 +182,7 @@ class TopBarView:
     def _build_image_menu(self) -> None:
 
         menu = tk.Menu(
-            self.menu_frame,
+            self._menu_frame,
             tearoff=False,
         )
 
@@ -202,7 +202,7 @@ class TopBarView:
     def _build_layer_menu(self) -> None:
 
         menu = tk.Menu(
-            self.menu_frame,
+            self._menu_frame,
             tearoff=False,
         )
 
@@ -236,7 +236,7 @@ class TopBarView:
     def _build_help_menu(self) -> None:
 
         menu = tk.Menu(
-            self.menu_frame,
+            self._menu_frame,
             tearoff=False,
         )
 
@@ -256,7 +256,7 @@ class TopBarView:
     def _build_actions(self) -> None:
 
         self.undo_button = tk.Button(
-            self.action_frame,
+            self._action_frame,
             text="Undo ↶",
             width=3,
             command=self.on_undo,
@@ -269,7 +269,7 @@ class TopBarView:
         )
 
         self.redo_button = tk.Button(
-            self.action_frame,
+            self._action_frame,
             text="Redo ↷",
             width=3,
             command=self.on_redo,
@@ -308,12 +308,9 @@ class TopBarView:
         )
 
     # =============================================================
-    # DISPLAY
+    # WIDGET
     # =============================================================
 
-    def pack(self) -> None:
+    def get_widget(self) -> tk.Frame:
 
-        self.frame.pack(
-            side=tk.TOP,
-            fill=tk.X,
-        )
+        return self._frame

@@ -11,17 +11,42 @@ class CanvasView:
         width: int = 400,
         height: int = 400,
     ):
-        self.canvas = tk.Canvas(
+        self._width = width
+        self._height = height
+
+        # =========================================================
+        # WORKSPACE
+        # =========================================================
+
+        self._workspace = tk.Frame(
             parent,
+            bg="#d0d0d0",
+        )
+
+        self._workspace.pack_propagate(
+            False
+        )
+
+        # =========================================================
+        # CANVAS
+        # =========================================================
+
+        self._canvas = tk.Canvas(
+            self._workspace,
             width=width,
             height=height,
             bg="white",
+            highlightthickness=1,
+            highlightbackground="black",
             cursor="crosshair",
         )
 
-        self.canvas.pack(
-            padx=10,
-            pady=10,
+        self._canvas.place(
+            relx=0.5,
+            rely=0.5,
+            anchor=tk.CENTER,
+            width=width,
+            height=height,
         )
 
         self.tk_image = None
@@ -35,7 +60,8 @@ class CanvasView:
         event: str,
         callback,
     ) -> None:
-        self.canvas.bind(
+
+        self._canvas.bind(
             event,
             callback,
         )
@@ -44,15 +70,20 @@ class CanvasView:
     # RENDERING
     # =============================================================
 
-    def display_image(self, image) -> None:
+    def display_image(
+        self,
+        image,
+    ) -> None:
 
         self.tk_image = ImageTk.PhotoImage(
             image
         )
 
-        self.canvas.delete("all")
+        self._canvas.delete(
+            "all"
+        )
 
-        self.canvas.create_image(
+        self._canvas.create_image(
             0,
             0,
             anchor=tk.NW,
@@ -73,7 +104,7 @@ class CanvasView:
         width: int,
     ) -> int:
 
-        return self.canvas.create_line(
+        return self._canvas.create_line(
             x1,
             y1,
             x2,
@@ -89,13 +120,26 @@ class CanvasView:
         preview_id: int,
     ) -> None:
 
-        self.canvas.delete(
+        self._canvas.delete(
             preview_id
         )
 
     # =============================================================
-    # ACCESS
+    # WIDGET
     # =============================================================
 
-    def get_widget(self):
-        return self.canvas
+    def get_widget(
+        self,
+    ) -> tk.Frame:
+
+        return self._workspace
+
+    # =============================================================
+    # CANVAS
+    # =============================================================
+
+    def get_canvas(
+        self,
+    ) -> tk.Canvas:
+
+        return self._canvas

@@ -11,7 +11,7 @@ class ColorFieldView:
 
     def __init__(
         self,
-        parent,
+        parent: tk.Widget,
         on_change,
     ):
         self._on_change = on_change
@@ -54,9 +54,8 @@ class ColorFieldView:
         hue: float,
     ) -> None:
 
-        self._hue = max(
-            0.0,
-            min(1.0, hue),
+        self._hue = self._clamp(
+            hue
         )
 
         self._draw()
@@ -67,14 +66,12 @@ class ColorFieldView:
         lightness: float,
     ) -> None:
 
-        self._saturation = max(
-            0.0,
-            min(1.0, saturation),
+        self._saturation = self._clamp(
+            saturation
         )
 
-        self._lightness = max(
-            0.0,
-            min(1.0, lightness),
+        self._lightness = self._clamp(
+            lightness
         )
 
         self._update_selector()
@@ -91,28 +88,66 @@ class ColorFieldView:
 
     def _draw(self) -> None:
 
-        width = self.WIDTH
-        height = self.HEIGHT
+        image = self._create_color_image()
+
+        self._image_tk = ImageTk.PhotoImage(
+            image
+        )
+
+        if self._image_id is None:
+
+            self._image_id = (
+                self.canvas.create_image(
+                    0,
+                    0,
+                    anchor=tk.NW,
+                    image=self._image_tk,
+                )
+            )
+
+        else:
+
+            self.canvas.itemconfigure(
+                self._image_id,
+                image=self._image_tk,
+            )
+
+        self._update_selector()
+
+    def _create_color_image(
+        self,
+    ) -> Image.Image:
 
         image = Image.new(
             "RGB",
-            (width, height),
+            (
+                self.WIDTH,
+                self.HEIGHT,
+            ),
         )
 
-        for x in range(width):
+        for x in range(self.WIDTH):
 
-            saturation = x / (width - 1)
+            saturation = (
+                x / (self.WIDTH - 1)
+            )
 
-            for y in range(height):
+            for y in range(self.HEIGHT):
 
-                lightness = 1.0 - (
-                    y / (height - 1)
+                lightness = (
+                    1.0
+                    - (
+                        y
+                        / (self.HEIGHT - 1)
+                    )
                 )
 
-                red, green, blue = colorsys.hls_to_rgb(
-                    self._hue,
-                    lightness,
-                    saturation,
+                red, green, blue = (
+                    colorsys.hls_to_rgb(
+                        self._hue,
+                        lightness,
+                        saturation,
+                    )
                 )
 
                 image.putpixel(
@@ -124,27 +159,7 @@ class ColorFieldView:
                     ),
                 )
 
-        self._image_tk = ImageTk.PhotoImage(
-            image
-        )
-
-        if self._image_id is None:
-
-            self._image_id = self.canvas.create_image(
-                0,
-                0,
-                anchor=tk.NW,
-                image=self._image_tk,
-            )
-
-        else:
-
-            self.canvas.itemconfigure(
-                self._image_id,
-                image=self._image_tk,
-            )
-
-        self._update_selector()
+        return image
 
     def _update_selector(self) -> None:
 
@@ -202,20 +217,29 @@ class ColorFieldView:
 
         x = max(
             0,
-            min(event.x, width - 1),
+            min(
+                event.x,
+                width - 1,
+            ),
         )
 
         y = max(
             0,
-            min(event.y, height - 1),
+            min(
+                event.y,
+                height - 1,
+            ),
         )
 
         self._saturation = (
             x / (width - 1)
         )
 
-        self._lightness = 1.0 - (
-            y / (height - 1)
+        self._lightness = (
+            1.0
+            - (
+                y / (height - 1)
+            )
         )
 
         self._update_selector()
@@ -223,4 +247,21 @@ class ColorFieldView:
         self._on_change(
             self._saturation,
             self._lightness,
+        )
+
+    # =========================================================
+    # UTILITIES
+    # =========================================================
+
+    @staticmethod
+    def _clamp(
+        value: float,
+    ) -> float:
+
+        return max(
+            0.0,
+            min(
+                1.0,
+                value,
+            ),
         )
