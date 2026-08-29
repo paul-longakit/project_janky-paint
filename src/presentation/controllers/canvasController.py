@@ -55,6 +55,14 @@ class CanvasController:
             self.refresh()
             return
 
+        if self.editor_controller.current_tool == PaintTool.EYEDROPPER:
+            self.editor_controller.pick_color(
+                Point(event.x, event.y)
+            )
+
+            self.refresh()
+            return
+
         self.is_drawing = True
 
         self.current_points = [

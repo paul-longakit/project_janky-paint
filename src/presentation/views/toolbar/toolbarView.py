@@ -1,5 +1,7 @@
 import tkinter as tk
 
+from src.domain.enums.paintToolEnum import PaintTool
+
 
 class ToolbarView:
 
@@ -10,6 +12,7 @@ class ToolbarView:
         on_brush,
         on_eraser,
         on_bucket,
+        on_eyedropper,
         on_brush_size_change,
     ):
         self._toolbar = tk.Frame(
@@ -22,6 +25,7 @@ class ToolbarView:
             on_brush=on_brush,
             on_eraser=on_eraser,
             on_bucket=on_bucket,
+            on_eyedropper=on_eyedropper,
         )
 
         self._build_brush_size_slider(
@@ -38,6 +42,7 @@ class ToolbarView:
         on_brush,
         on_eraser,
         on_bucket,
+        on_eyedropper,
     ) -> None:
 
         tk.Button(
@@ -62,6 +67,15 @@ class ToolbarView:
             self._toolbar,
             text="🪣 Bucket",
             command=on_bucket,
+        ).pack(
+            fill=tk.X,
+            pady=2,
+        )
+
+        tk.Button(
+            self._toolbar,
+            text="💉 Eyedropper",
+            command=on_eyedropper,
         ).pack(
             fill=tk.X,
             pady=2,

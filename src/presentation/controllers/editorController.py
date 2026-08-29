@@ -172,6 +172,47 @@ class EditorController:
             )
         )
 
+    def pick_color(
+        self,
+        point: Point,
+    ) -> None:
+
+        color = self._sample_color_at_point(point)
+
+        if color is not None:
+            self.set_color(color)
+
+            if hasattr(self, 'on_history_change') and self.on_history_change:
+                self.on_history_change()
+
+    def _sample_color_at_point(
+        self,
+        point: Point,
+    ):
+
+        for layer in reversed(self.paint.layers):
+
+            if not layer.visible:
+                continue
+
+            try:
+                pixel = layer.image.getpixel(
+                    (point.x, point.y)
+                )
+
+                if len(pixel) == 4:
+                    r, g, b, a = pixel
+
+                    if a == 0:
+                        continue
+
+                    return Color(r, g, b, a)
+
+            except IndexError:
+                continue
+
+        return None
+
     def _execute_with_history(
         self,
         operation,

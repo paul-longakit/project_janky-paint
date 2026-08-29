@@ -28,6 +28,7 @@ class EditorView:
         on_brush,
         on_eraser,
         on_bucket,
+        on_eyedropper,
         on_brush_size_change,
     ):
         self._root = root
@@ -121,6 +122,7 @@ class EditorView:
             on_brush=on_brush,
             on_eraser=on_eraser,
             on_bucket=on_bucket,
+            on_eyedropper=on_eyedropper,
             on_brush_size_change=(
                 on_brush_size_change
             ),
