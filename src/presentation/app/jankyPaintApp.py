@@ -92,6 +92,7 @@ class JankyPaintApp:
             on_brush=self._use_brush,
             on_eraser=self._use_eraser,
             on_bucket=self._use_bucket,
+            on_eyedropper=self._use_eyedropper,
 
             on_brush_size_change=(
                 self._on_brush_size_change
@@ -126,6 +127,11 @@ class JankyPaintApp:
     def _use_bucket(self) -> None:
         self.controller.set_tool(
             PaintTool.BUCKET
+        )
+
+    def _use_eyedropper(self) -> None:
+        self.controller.set_tool(
+            PaintTool.EYEDROPPER
         )
 
     def _on_brush_size_change(

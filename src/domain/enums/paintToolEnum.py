@@ -5,3 +5,4 @@ class PaintTool(Enum):
     BRUSH = "brush"
     ERASER = "eraser"
     BUCKET = "bucket"
+    EYEDROPPER = "eyedropper"
